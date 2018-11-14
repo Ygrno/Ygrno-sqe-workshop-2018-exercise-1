@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import $ from 'jquery';
 import {parseCode_line} from './code-analyzer';
 
@@ -116,17 +115,79 @@ function variableDec_toString(exp){
 /**
  * @return {string}
  */
+function Literal_toString(str, expression) {
+    str = expression['value'];
+    return str;
+}
+
+/**
+ * @return {string}
+ */
+function BE_toString(str, expression) {
+    str = Exp_toString(expression['left']) + ' ' + expression['operator'] + ' ' + Exp_toString(expression['right']);
+    return str;
+}
+/**
+ * @return {string}
+ */
+function Identifier_toString(str, expression) {
+    str = expression['name'];
+    return str;
+}
+/**
+ * @return {string}
+ */
+function ME_toString(str, expression) {
+    str = expression['object']['name'] + '[' + expression['property']['name'] + ']';
+    return str;
+}
+/**
+ * @return {string}
+ */
+function UA_toString(str, expression) {
+    str = expression['operator'] + Exp_toString(expression['argument']);
+    return str;
+}
+/**
+ * @return {string}
+ */
+function UE_toString(str, expression) {
+    str = Exp_toString(expression['argument']) + expression['operator'] + ' ';
+    return str;
+}
+/**
+ * @return {string}
+ */
+function VD1_toString(str, expression) {
+    str = variableDec_toString(expression);
+    return str;
+}
+/**
+ * @return {string}
+ */
+function VD2_toString(str, expression) {
+    str = ' ' + expression['id']['name'] + ' = ' + Exp_toString(expression['init']);
+    return str;
+}
+
+const FUNCTIONS_toString = {
+    Literal: Literal_toString,
+    BinaryExpression: BE_toString,
+    Identifier: Identifier_toString,
+    MemberExpression: ME_toString,
+    UnaryExpression: UA_toString,
+    UpdateExpression: UE_toString,
+    VariableDeclaration: VD1_toString,
+    VariableDeclarator: VD2_toString
+};
+
+/**
+ * @return {string}
+ */
 function Exp_toString(expression){
     if(expression === null) return 'null';
     let exp_type = expression['type'];
-    let str = '';
-    switch (exp_type) {case 'Literal': str = expression['value']; break; case 'BinaryExpression':{str = Exp_toString(expression['left']) +' ' + expression['operator'] + ' ' + Exp_toString(expression['right']);} break;
-    case 'Identifier': str = expression['name']; break; case 'MemberExpression':{str = expression['object']['name'] + '[' + expression['property']['name'] + ']'; break;}
-    case 'UnaryExpression': str = expression['operator'] + Exp_toString(expression['argument']); break;
-    case 'UpdateExpression': str = Exp_toString(expression['argument']) + expression['operator'] + ' '; break;
-    case 'VariableDeclaration': str = variableDec_toString(expression); break;
-    case 'VariableDeclarator': str = ' ' + expression['id']['name'] + ' = ' + Exp_toString(expression['init']); break;}
-    return str;
+    return FUNCTIONS_toString[exp_type]('', expression);
 }
 
 
@@ -171,15 +232,32 @@ function ForState_parser(codeToExtract,arr){
     for(let i = 0; i<for_body.length;  i++) Builder(for_body[i],arr);
 }
 
-function Builder(codeToExtract,arr,alternate){
+const Functions_parser = {
+    FunctionDeclaration: FuncDec_parser,
+    VariableDeclaration: VarDec_parser,
+    ExpressionStatement: ExpState_parser,
+    WhileStatement: WhileState_parser,
+    IfStatement:IfState_parser,
+    ReturnStatement: ReturnState_parser,
+    ForStatement: ForState_parser,
+    Identifier: Identifier_parser,
+    VariableDeclarator: VarDeclarator_parser};
+
+function Builder(codeToExtract,arr,alternate) {
     let type = codeToExtract['type'];
-    switch (type) {case 'FunctionDeclaration': FuncDec_parser(codeToExtract,arr); break; case 'Identifier':Identifier_parser(codeToExtract,arr);break;
-    case 'VariableDeclaration': VarDec_parser(codeToExtract,arr); break; case 'VariableDeclarator':VarDeclarator_parser(codeToExtract,arr); break;
-    case 'ExpressionStatement': ExpState_parser(codeToExtract,arr); break;
-    case 'WhileStatement': WhileState_parser(codeToExtract,arr); break;
-    case 'IfStatement': {if(alternate === 1) IfState_parser(codeToExtract,arr,1); else IfState_parser(codeToExtract,arr,0);} break;
-    case 'ReturnStatement': ReturnState_parser(codeToExtract,arr); break;
-    case 'ForStatement': ForState_parser(codeToExtract,arr); break;}
+    if(type.toString() !== 'IfStatement') Functions_parser[type](codeToExtract,arr,alternate);
+    else if(alternate === 1) IfState_parser(codeToExtract,arr,1); else IfState_parser(codeToExtract,arr,0);
+}
+
+
+function HTML_row_maker(myArray, i, result) {
+    for (var key in myArray[i]) {
+        if (myArray[i].hasOwnProperty(key)) {
+            if (myArray[i][key] === null || myArray[i][key] === undefined) result += '<td align="center">' + '</td>';
+            else result += '<td align="center">' + (myArray[i][key]).toString() + '</td>';
+        }
+    }
+    return result;
 }
 
 function makeTableHTML(myArray) {
@@ -191,12 +269,7 @@ function makeTableHTML(myArray) {
     result += '<th>' + 'Condition' + '</th>'; result += '<th>' + 'Value' + '</th>'; result += '</tr>';
     for(var i=0; i<myArray.length; i++) {
         result += '<tr>';
-        for(var key in myArray[i]){
-            if(myArray[i].hasOwnProperty(key)) {
-                if (myArray[i][key] === null || myArray[i][key] === undefined) result += '<td align="center">' + '</td>';
-                else result += '<td align="center">' + (myArray[i][key]).toString() + '</td>';
-            }
-        }
+        result = HTML_row_maker(myArray, i, result);
         result += '</tr>';
     }
     result += '</table>'; return result;
