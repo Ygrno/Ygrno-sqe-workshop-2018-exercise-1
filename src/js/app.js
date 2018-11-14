@@ -104,13 +104,28 @@ function VarDeclarator_parser(codeToExtract,arr){
 /**
  * @return {string}
  */
+function variableDec_toString(exp){
+    let dec = exp['declarations'];
+    let str = '';
+    let i;
+    for(i=0;i<dec.length - 1;i++) str += Exp_toString(dec[i]) + ',';
+    str += Exp_toString(dec[i]);
+    return str;
+}
+
+/**
+ * @return {string}
+ */
 function Exp_toString(expression){
     if(expression === null) return 'null';
     let exp_type = expression['type'];
     let str = '';
     switch (exp_type) {case 'Literal': str = expression['value']; break; case 'BinaryExpression':{str = Exp_toString(expression['left']) +' ' + expression['operator'] + ' ' + Exp_toString(expression['right']);} break;
     case 'Identifier': str = expression['name']; break; case 'MemberExpression':{str = expression['object']['name'] + '[' + expression['property']['name'] + ']'; break;}
-    case 'UnaryExpression': str = expression['operator'] + Exp_toString(expression['argument']); break; }
+    case 'UnaryExpression': str = expression['operator'] + Exp_toString(expression['argument']); break;
+    case 'UpdateExpression': str = Exp_toString(expression['argument']) + expression['operator'] + ' '; break;
+    case 'VariableDeclaration': str = variableDec_toString(expression); break;
+    case 'VariableDeclarator': str = ' ' + expression['id']['name'] + ' = ' + Exp_toString(expression['init']); break;}
     return str;
 }
 
@@ -143,10 +158,17 @@ function IfState_parser(codeToExtract,arr,alternate){
 }
 
 function ReturnState_parser(codeToExtract,arr){
-
     let value = Exp_toString(codeToExtract['argument']);
     arr.push(new Part(codeToExtract['loc']['start']['line'], 'return statement', undefined,undefined,value));
+}
 
+function ForState_parser(codeToExtract,arr){
+    let init = Exp_toString(codeToExtract['init']);
+    let test = Exp_toString(codeToExtract['test']);
+    let update = Exp_toString(codeToExtract['update']);
+    arr.push(new Part(codeToExtract['loc']['start']['line'], 'for statement', undefined,init + ' ; ' + test + ' ; ' + update,undefined));
+    let for_body = codeToExtract['body']['body'];
+    for(let i = 0; i<for_body.length;  i++) Builder(for_body[i],arr);
 }
 
 function Builder(codeToExtract,arr,alternate){
@@ -156,7 +178,8 @@ function Builder(codeToExtract,arr,alternate){
     case 'ExpressionStatement': ExpState_parser(codeToExtract,arr); break;
     case 'WhileStatement': WhileState_parser(codeToExtract,arr); break;
     case 'IfStatement': {if(alternate === 1) IfState_parser(codeToExtract,arr,1); else IfState_parser(codeToExtract,arr,0);} break;
-    case 'ReturnStatement': ReturnState_parser(codeToExtract,arr); break;}
+    case 'ReturnStatement': ReturnState_parser(codeToExtract,arr); break;
+    case 'ForStatement': ForState_parser(codeToExtract,arr); break;}
 }
 
 function makeTableHTML(myArray) {
