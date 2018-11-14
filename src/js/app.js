@@ -159,7 +159,25 @@ function Builder(codeToExtract,arr,alternate){
     case 'ReturnStatement': ReturnState_parser(codeToExtract,arr); break;}
 }
 
-
+function makeTableHTML(myArray) {
+    var result = '<table border=1 align="center" style="margin: 0 auto;">';
+    result += '<tr>';
+    result += '<th>' + 'Line' + '</th>';
+    result += '<th>' + 'Type' + '</th>';
+    result += '<th>' + 'Name' + '</th>';
+    result += '<th>' + 'Condition' + '</th>'; result += '<th>' + 'Value' + '</th>'; result += '</tr>';
+    for(var i=0; i<myArray.length; i++) {
+        result += '<tr>';
+        for(var key in myArray[i]){
+            if(myArray[i].hasOwnProperty(key)) {
+                if (myArray[i][key] === null || myArray[i][key] === undefined) result += '<td align="center">' + '</td>';
+                else result += '<td align="center">' + (myArray[i][key]).toString() + '</td>';
+            }
+        }
+        result += '</tr>';
+    }
+    result += '</table>'; return result;
+}
 
 // $(document).ready(function () {
 //     $('#codeSubmissionButton').click(() => {
@@ -176,7 +194,7 @@ $(document).ready(function () {
         let codeToParse = $('#codePlaceholder').val();
         let parsedCode = parseCode_line(codeToParse);
         Builder(parsedCode['body'][0],arr);
-        $('#parsedCode').val(JSON.stringify(arr,null,2));
+        document.write(makeTableHTML(arr));
     });
 });
 
