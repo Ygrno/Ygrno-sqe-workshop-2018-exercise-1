@@ -11,8 +11,37 @@ function HTML_row_maker(myArray, i, result) {
     return result;
 }
 
+const table_style = '    <style>\n' +
+    '        table, th, td {\n' +
+    '            /*border: 1px solid black;*/\n' +
+    '            border-collapse: collapse;\n' +
+    '        }\n' +
+    '\n' +
+    '        th, td {\n' +
+    '            padding: 12px;\n' +
+    '            text-align: center;\n' +
+    '        }\n' +
+    '\n' +
+    '        table#t01 tr:nth-child(even) {\n' +
+    '            background-color: #eee;\n' +
+    '        }\n' +
+    '        table#t01 tr:nth-child(odd) {\n' +
+    '            background-color: #fff;\n' +
+    '        }\n' +
+    '        table#t01 th {\n' +
+    '            background-color: black;\n' +
+    '            color: white;\n' +
+    '        }\n' +
+    '\n' +
+    '        textarea {\n' +
+    '            width: 80%;\n' +
+    '            height: 95%;\n' +
+    '        }\n' +
+    '    </style>';
+
 function makeTableHTML(myArray) {
-    var result = '<table border=1 align="center" style="margin: 0 auto;">';
+    let result = table_style;
+    result += '<table id="t01" border=1 align="center" style="margin: 0 auto;">';
     result += '<tr>';
     result += '<th>' + 'Line' + '</th>';
     result += '<th>' + 'Type' + '</th>';
