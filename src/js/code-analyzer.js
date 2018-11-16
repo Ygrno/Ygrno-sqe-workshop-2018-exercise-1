@@ -12,7 +12,7 @@ function FuncDec_parser(codeToExtract,arr){
     arr.push(new Part(codeToExtract['loc']['start']['line'], 'function declaration', codeToExtract['id']['name']));
     if(codeToExtract['params'].length > 0) {for(let i=0;i<codeToExtract['params'].length;i++){Builder(codeToExtract['params'][i],arr,4);}}
     let func_body = codeToExtract['body']['body'];
-    for(let i = 0;i<func_body.length;i++){Builder(func_body[i],arr,4);}
+    for(let i = 0;i<func_body.length;i++){if(func_body[i]['type'].toString() === 'IfStatement') Builder(func_body[i],arr,0); else Builder(func_body[i],arr,4);}
 }
 
 function Identifier_parser(codeToExtract,arr){
@@ -143,7 +143,6 @@ function IfState_parser(codeToExtract,arr,alternate){
     else arr.push(new Part(codeToExtract['loc']['start']['line'], 'else if statement', undefined,condition,undefined));
     Builder(codeToExtract['consequent'],arr,4);
     if(codeToExtract['alternate'] != null) Builder(codeToExtract['alternate'],arr,1);
-    else Builder(codeToExtract['alternate'],arr,0);
 }
 
 function ReturnState_parser(codeToExtract,arr){
