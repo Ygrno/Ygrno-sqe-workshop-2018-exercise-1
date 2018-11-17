@@ -1,6 +1,6 @@
 import * as esprima from 'esprima';
 
-function Part(line, type, name,condition, value){
+function TableLine(line, type, name,condition, value){
     this.line = line;
     this.type = type;
     this.name = name;
@@ -8,24 +8,24 @@ function Part(line, type, name,condition, value){
     this.value = value;
 }
 
-function FuncDec_parser(codeToExtract,arr){
-    arr.push(new Part(codeToExtract['loc']['start']['line'], 'function declaration', codeToExtract['id']['name']));
+function FuncDec_P(codeToExtract,arr){
+    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'function declaration', codeToExtract['id']['name']));
     if(codeToExtract['params'].length > 0) {for(let i=0;i<codeToExtract['params'].length;i++){Builder(codeToExtract['params'][i],arr,4);}}
     let func_body = codeToExtract['body']['body'];
     for(let i = 0;i<func_body.length;i++){if(func_body[i]['type'].toString() === 'IfStatement') Builder(func_body[i],arr,0); else Builder(func_body[i],arr,4);}
 }
 
-function Identifier_parser(codeToExtract,arr){
-    arr.push(new Part(codeToExtract['loc']['start']['line'], 'variable declaration', codeToExtract['name']));
+function Identifier_P(codeToExtract,arr){
+    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'variable declaration', codeToExtract['name']));
 }
 
-function VarDec_parser(codeToExtract,arr){
+function VarDec_P(codeToExtract,arr){
     let declarations = codeToExtract['declarations'];
     for(let i=0; i<declarations.length;i++){Builder(declarations[i],arr,4);}
 }
 
-function VarDeclarator_parser(codeToExtract,arr){
-    arr.push(new Part(codeToExtract['loc']['start']['line'], 'variable declaration', codeToExtract['id']['name'],undefined, Exp_toString(codeToExtract['init'])));
+function VarDeclarator_P(codeToExtract,arr){
+    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'variable declaration', codeToExtract['id']['name'],undefined, Exp_toString(codeToExtract['init'])));
 }
 
 /**
@@ -120,64 +120,64 @@ function Exp_toString(expression){
 
 
 function ExpAE_parser(codeToExtract,arr){
-    arr.push(new Part(codeToExtract['loc']['start']['line'], 'assignment expression', codeToExtract['left']['name'],undefined, Exp_toString(codeToExtract['right'])));
+    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'assignment expression', codeToExtract['left']['name'],undefined, Exp_toString(codeToExtract['right'])));
 }
 
-function ExpState_parser(codeToExtract,arr){
+function ExpState_P(codeToExtract,arr){
     let expression = codeToExtract['expression'];
     let exp_type = expression['type'];
     switch (exp_type) {case 'AssignmentExpression': ExpAE_parser(expression,arr); break;}
 
 }
 
-function WhileState_parser(codeToExtract,arr){
+function WhileState_P(codeToExtract,arr){
     let condition = Exp_toString(codeToExtract['test']);
-    arr.push(new Part(codeToExtract['loc']['start']['line'], 'while statement', undefined,condition,undefined));
+    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'while statement', undefined,condition,undefined));
     let while_body = codeToExtract['body']['body'];
     for(let i = 0; i<while_body.length;  i++) Builder(while_body[i],arr,4);
 }
 
-function IfState_parser(codeToExtract,arr,alternate){
+function IfState_P(codeToExtract,arr,alternate){
     let condition = Exp_toString(codeToExtract['test']);
-    if(alternate === 0) arr.push(new Part(codeToExtract['loc']['start']['line'], 'if statement', undefined,condition,undefined));
-    else arr.push(new Part(codeToExtract['loc']['start']['line'], 'else if statement', undefined,condition,undefined));
+    if(alternate === 0) arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'if statement', undefined,condition,undefined));
+    else arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'else if statement', undefined,condition,undefined));
     Builder(codeToExtract['consequent'],arr,4);
     if(codeToExtract['alternate'] != null) Builder(codeToExtract['alternate'],arr,1);
 }
 
-function ReturnState_parser(codeToExtract,arr){
+function ReturnState_P(codeToExtract,arr){
     let value = Exp_toString(codeToExtract['argument']);
-    arr.push(new Part(codeToExtract['loc']['start']['line'], 'return statement', undefined,undefined,value));
+    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'return statement', undefined,undefined,value));
 }
 
-function ForState_parser(codeToExtract,arr){
+function ForState_P(codeToExtract,arr){
     let init = Exp_toString(codeToExtract['init']);
     let test = Exp_toString(codeToExtract['test']);
     let update = Exp_toString(codeToExtract['update']);
-    arr.push(new Part(codeToExtract['loc']['start']['line'], 'for statement', undefined,init + ' ; ' + test + ' ; ' + update,undefined));
+    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'for statement', undefined,init + ' ; ' + test + ' ; ' + update,undefined));
     let for_body = codeToExtract['body']['body'];
     for(let i = 0; i<for_body.length;  i++) Builder(for_body[i],arr,4);
 }
 
 const Functions_parser = {
-    FunctionDeclaration: FuncDec_parser,
-    VariableDeclaration: VarDec_parser,
-    ExpressionStatement: ExpState_parser,
-    WhileStatement: WhileState_parser,
-    IfStatement:IfState_parser,
-    ReturnStatement: ReturnState_parser,
-    ForStatement: ForState_parser,
-    Identifier: Identifier_parser,
-    VariableDeclarator: VarDeclarator_parser};
+    FunctionDeclaration: FuncDec_P,
+    VariableDeclaration: VarDec_P,
+    ExpressionStatement: ExpState_P,
+    WhileStatement: WhileState_P,
+    IfStatement:IfState_P,
+    ReturnStatement: ReturnState_P,
+    ForStatement: ForState_P,
+    Identifier: Identifier_P,
+    VariableDeclarator: VarDeclarator_P};
 
 /**
  * @return {string}
  */
 function Builder(codeToExtract,arr,alternate) {
-    let type = codeToExtract['type'];
-    if((alternate === 5) && (type.toString() !== 'FunctionDeclaration')) return 'Error - Not Function';
-    if(type.toString() !== 'IfStatement') Functions_parser[type](codeToExtract,arr,4);
-    else if(alternate === 1) IfState_parser(codeToExtract,arr,1); else IfState_parser(codeToExtract,arr,0);
+    let exp_type = codeToExtract['type'];
+    if((alternate === 5) && (exp_type.toString() !== 'FunctionDeclaration')) return 'Error - Not Function';
+    if(exp_type.toString() !== 'IfStatement') Functions_parser[exp_type](codeToExtract,arr,4);
+    else if(alternate === 1) IfState_P(codeToExtract,arr,1); else IfState_P(codeToExtract,arr,0);
 }
 
 const parseCode = (codeToParse) => {
