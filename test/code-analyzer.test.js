@@ -98,6 +98,16 @@ function Test8() {
     });
 }
 
+function Test12() {
+    it('is parsing If-Statement correctly', () => {
+        let arr = [];
+        let codeToParse = 'function A(){\n' + 'if(x>5) y = 6;\n' + '}';
+        let parsedCode = parseCode_line(codeToParse);
+        Builder(parsedCode['body'][0], arr,5);
+        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"A"},{"line":2,"type":"if statement","condition":"x > 5"},{"line":2,"type":"assignment expression","name":"y","value":6}]');
+    });
+}
+
 function Test9() {
     it('is converting Binary-Expression to string correctly', () => {
         let codeToParse = 'n+1';
@@ -116,6 +126,15 @@ function Test10() {
     });
 }
 
+function Test11(){
+    it('is converting variable declaration to string correctly', () => {
+        let codeToParse = 'let low, high, end = 0;';
+        let parsedCode = parseCode_line(codeToParse);
+        let str = Exp_toString(parsedCode['body'][0]);
+        assert.equal(str,' low = null, high = null, end = 0');
+    });
+}
+
 
 
 describe('The javascript parser', () => {
@@ -130,9 +149,11 @@ describe('Html table parser', ()=> {
     Test6();
     Test7();
     Test8();
+    Test12();
 });
 
 describe('Expression to String', ()=> {
     Test9();
     Test10();
+    Test11();
 });
