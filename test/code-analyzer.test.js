@@ -5,8 +5,17 @@ import {parseCode, parseCode_line, Builder, Exp_toString} from '../src/js/code-a
 function Test1() {
     it('is parsing an empty function correctly', () => {
         assert.equal(
-            JSON.stringify(parseCode('')),
-            '{"type":"Program","body":[],"sourceType":"script"}'
+            JSON.stringify(parseCode_line(''),null,4), '{\n' + '    "type": "Program",\n' + '    "body": [],\n' + '    "sourceType": "script",\n' + '    "loc": {\n' +
+            '        "start": {\n' +
+            '            "line": 0,\n' +
+            '            "column": 0\n' +
+            '        },\n' +
+            '        "end": {\n' +
+            '            "line": 0,\n' +
+            '            "column": 0\n' +
+            '        }\n' +
+            '    }\n' +
+            '}'
         );
     });
 }
