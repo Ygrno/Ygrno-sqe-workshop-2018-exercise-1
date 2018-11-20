@@ -1,5 +1,6 @@
 import assert from 'assert';
-import {parseCode, parseCode_line, Builder, Exp_toString} from '../src/js/code-analyzer';
+import {parseCode, parseCode_line, Builder} from '../src/js/code-analyzer';
+import * as esco from 'escodegen';
 
 
 function Test1() {
@@ -35,14 +36,7 @@ function Test3() {
         let codeToParse = 'function binarySearch(X, V, n){\n' + '    let low, high, mid;\n' + '    low = 0;\n' + '    high = n - 1;\n' + '    while (low <= high) {\n' + '        mid = (low + high)/2;\n' + '        if (X < V[mid])\n' + '            high = mid - 1;\n' + '        else if (X > V[mid])\n' + '            low = mid + 1;\n' + '        else\n' + '            return mid;\n' + '    }\n' + '    return -1;\n' + '}';
         let parsedCode = parseCode_line(codeToParse);
         Builder(parsedCode['body'][0], arr);
-        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"binarySearch"},{"line":1,"type":"variable declaration","name":"X"},' + '{"line":1,"type":"variable declaration","name":"V"},{"line":1,"type":"variable declaration","name":"n"},{"line":2,"type":"variable declaration",' +
-            '"name":"low","value":"null"},{"line":2,"type":"variable declaration","name":"high",' +
-            '"value":"null"},{"line":2,"type":"variable declaration","name":"mid","value":"null"},' +
-            '{"line":3,"type":"assignment expression","name":"low","value":0},{"line":4,' +
-            '"type":"assignment expression","name":"high","value":"n - 1"},' + '{"line":5,"type":"while statement","condition":"low <= high"},' +
-            '{"line":6,"type":"assignment expression","name":"mid","value":"low + high / 2"},' + '{"line":7,"type":"if statement","condition":"X < V[mid]"},{"line":8,"type":"assignment expression",' +
-            '"name":"high","value":"mid - 1"},{"line":9,"type":"else if statement","condition":"X > V[mid]"},' +
-            '{"line":10,"type":"assignment expression","name":"low","value":"mid + 1"},{"line":12,"type":"return statement","value":"mid"},' + '{"line":14,"type":"return statement","value":"-1"}]');
+        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"binarySearch"},{"line":1,"type":"variable declaration","name":"X"},{"line":1,"type":"variable declaration","name":"V"},{"line":1,"type":"variable declaration","name":"n"},{"line":2,"type":"variable declaration","name":"low","value":"null"},{"line":2,"type":"variable declaration","name":"high","value":"null"},{"line":2,"type":"variable declaration","name":"mid","value":"null"},{"line":3,"type":"assignment expression","name":"low","value":"0"},{"line":4,"type":"assignment expression","name":"high","value":"n - 1"},{"line":5,"type":"while statement","condition":"low <= high"},{"line":6,"type":"assignment expression","name":"mid","value":"(low + high) / 2"},{"line":7,"type":"if statement","condition":"X < V[mid]"},{"line":8,"type":"assignment expression","name":"high","value":"mid - 1"},{"line":9,"type":"else if statement","condition":"X > V[mid]"},{"line":10,"type":"assignment expression","name":"low","value":"mid + 1"},{"line":12,"type":"return statement","value":"mid"},{"line":14,"type":"return statement","value":"-1"}]');
     });
 }
 
@@ -52,7 +46,7 @@ function Test4() {
         let codeToParse = 'function BS() { let a = 5; }';
         let parsedCode = parseCode_line(codeToParse);
         Builder(parsedCode['body'][0], arr);
-        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"BS"},{"line":1,"type":"variable declaration","name":"a","value":5}]');
+        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"BS"},{"line":1,"type":"variable declaration","name":"a","value":"5"}]');
     });
 }
 
@@ -74,7 +68,7 @@ function Test6() {
         let codeToParse = 'function BS() { for(var i = 0; i<=3 ; i++) {let a = 6;} }';
         let parsedCode = parseCode_line(codeToParse);
         Builder(parsedCode['body'][0], arr,5);
-        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"BS"},{"line":1,"type":"for statement","condition":" i = 0 ; i <= 3 ; i++ "},{"line":1,"type":"variable declaration","name":"a","value":6}]');
+        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"BS"},{"line":1,"type":"for statement","condition":"var i = 0; ; i <= 3 ; i++"},{"line":1,"type":"variable declaration","name":"a","value":"6"}]');
     });
 }
 
@@ -84,7 +78,7 @@ function Test7() {
         let codeToParse = 'function BS() { while(a>5) {let a = 6;} }';
         let parsedCode = parseCode_line(codeToParse);
         Builder(parsedCode['body'][0], arr,5);
-        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"BS"},{"line":1,"type":"while statement","condition":"a > 5"},{"line":1,"type":"variable declaration","name":"a","value":6}]');
+        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"BS"},{"line":1,"type":"while statement","condition":"a > 5"},{"line":1,"type":"variable declaration","name":"a","value":"6"}]');
     });
 }
 
@@ -94,7 +88,7 @@ function Test8() {
         let codeToParse = 'function BS() { if(a > 7) x=3; else if(a < 3) x=6; else x=7;}';
         let parsedCode = parseCode_line(codeToParse);
         Builder(parsedCode['body'][0], arr,5);
-        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"BS"},{"line":1,"type":"if statement","condition":"a > 7"},{"line":1,"type":"assignment expression","name":"x","value":3},{"line":1,"type":"else if statement","condition":"a < 3"},{"line":1,"type":"assignment expression","name":"x","value":6},{"line":1,"type":"assignment expression","name":"x","value":7}]');
+        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"BS"},{"line":1,"type":"if statement","condition":"a > 7"},{"line":1,"type":"assignment expression","name":"x","value":"3"},{"line":1,"type":"else if statement","condition":"a < 3"},{"line":1,"type":"assignment expression","name":"x","value":"6"},{"line":1,"type":"assignment expression","name":"x","value":"7"}]');
     });
 }
 
@@ -104,7 +98,7 @@ function Test12() {
         let codeToParse = 'function A(){\n' + 'if(x>5) y = 6;\n' + '}';
         let parsedCode = parseCode_line(codeToParse);
         Builder(parsedCode['body'][0], arr,5);
-        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"A"},{"line":2,"type":"if statement","condition":"x > 5"},{"line":2,"type":"assignment expression","name":"y","value":6}]');
+        assert.equal(JSON.stringify(arr), '[{"line":1,"type":"function declaration","name":"A"},{"line":2,"type":"if statement","condition":"x > 5"},{"line":2,"type":"assignment expression","name":"y","value":"6"}]');
     });
 }
 
@@ -112,7 +106,7 @@ function Test9() {
     it('is converting Binary-Expression to string correctly', () => {
         let codeToParse = 'n+1';
         let parsedCode = parseCode_line(codeToParse);
-        let str = Exp_toString(parsedCode['body'][0]['expression']);
+        let str = esco.generate(parsedCode['body'][0]['expression']);
         assert.equal(str,'n + 1');
     });
 }
@@ -121,7 +115,7 @@ function Test10() {
     it('is converting Binary-Expression2 to string correctly', () => {
         let codeToParse = 'n+m';
         let parsedCode = parseCode_line(codeToParse);
-        let str = Exp_toString(parsedCode['body'][0]['expression']);
+        let str = esco.generate(parsedCode['body'][0]['expression']);
         assert.equal(str,'n + m');
     });
 }
@@ -130,8 +124,8 @@ function Test11(){
     it('is converting variable declaration to string correctly', () => {
         let codeToParse = 'let low, high, end = 0;';
         let parsedCode = parseCode_line(codeToParse);
-        let str = Exp_toString(parsedCode['body'][0]);
-        assert.equal(str,' low = null, high = null, end = 0');
+        let str = esco.generate(parsedCode['body'][0]);
+        assert.equal(str,'let low, high, end = 0;');
     });
 }
 

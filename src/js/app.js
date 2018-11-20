@@ -68,24 +68,3 @@ $(document).ready(function () {
         else codePlace.val(str);
     });
 });
-
-// -----------------------------------------------------------------------------------------------------------------------
-
-// $(document).ready(function () {
-//     $('#codeSubmissionButton').click(() => {
-//         let codeToParse = $('#codePlaceholder').val();
-//         let parsedCode = parseCode(codeToParse);
-//         $('#parsedCode').val(JSON.stringify(parsedCode, null, 2));
-//     });
-// });
-
-// $(document).ready(function () {
-//     $('#codeSubmissionButton').click(() => {
-//         let arr = [];
-//         let codeToParse = $('#codePlaceholder').val();
-//         let parsedCode = parseCode_line(codeToParse);
-//         Builder(parsedCode['body'][0],arr);
-//         $('#parsedCode').val(JSON.stringify(arr));
-//     });
-// });
-
