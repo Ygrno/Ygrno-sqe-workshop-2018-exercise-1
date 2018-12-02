@@ -32,7 +32,7 @@ function VarDeclarator_P(codeToExtract,arr){
 
 
 function ExpAE_parser(codeToExtract,arr){
-    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'assignment expression', codeToExtract['left']['name'],undefined, esco.generate(codeToExtract['right'])));
+    arr.push(new TableLine(codeToExtract['loc']['start']['line'], 'assignment expression', esco.generate(codeToExtract['left']),undefined, esco.generate(codeToExtract['right'])));
 }
 
 function ExpState_P(codeToExtract,arr){
